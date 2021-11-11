@@ -4,5 +4,5 @@ data_files:
       url: path_a_data
 
 bigquery:
-  project_id: 'corded-cortex-312822'
-  credentials: '/home/federico/federico/SSYT/ssyt/ssyt/config/corded-cortex-312822-b9a0b32e4518.json'
+  project_id: 'your google big query project id'
+  credentials: 'google dev credentials'
