@@ -1,8 +1,9 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
-import matplotlib.pyplot as plt
+import orca
+
 from visprev import *
+from charts import *
 
 st.set_page_config(
 page_title="Systema SYT",
@@ -38,24 +39,27 @@ if menu_list == "INICIO":
 elif menu_list == "VISPREV":
     st.subheader('**_Parametros de la consulta_**')
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    year = col1.selectbox('Año', ['2015','2016','2017','2018','2019','2020','2021'])
+    first_year = col1.selectbox('Año de inicio', ['2015','2016','2017','2018','2019','2020','2021'])
+    last_year = col2.selectbox('Año de finalización', ['2015','2016','2017','2018','2019','2020','2021'])
 
     months = ['01','02','03',
               '04','05','06',
               '07','08','09',
               '10','11','12']
 
-    first_month = col2.selectbox('Mes de inicio', months)
-    last_month = col3.selectbox('Mes de finalización', months)
-    df = get_properati_data(year, first_month, last_month)
+    first_month = col3.selectbox('Mes de inicio', months)
+    last_month = col4.selectbox('Mes de finalización', months)
+    df = get_properati_data(first_year, last_year, first_month, last_month)
 
-    region = col4.selectbox('Region', ['Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte',
-                                       'Capital Federal', 'Bs.As. G.B.A. Zona Sur'])
+    regions = ['Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte',
+               'Capital Federal', 'Bs.As. G.B.A. Zona Sur']
+    region = col5.selectbox('Region', regions)
+    orca.add_injectable('selected_region', region)
     series = choose_jurisdiction(df, region)
-    
-    deflactor = col5.selectbox('Deflactor', ['IPC Indec', 'ICL BCRA'])
+
+    deflactor = col6.selectbox('Deflactor', ['IPC Indec', 'ICL BCRA'])
     if deflactor == 'IPC Indec':
         ipc_indec = read_ipc()
         # SE PODRIA CONSUMIR DESDE LA API CKAN
@@ -81,18 +85,31 @@ elif menu_list == "VISPREV":
                                                             axis=1)
 
     adjusted_region = region_summary.apply(pd.Series)
-    region_columns = ['periodo', 'precio_nom', 'coeficiente', 'ipc_base', 'ipc_per', 'precio_con']
+    region_columns = ['periodo', 'precio_nom', 'coeficiente', 'indice_base', 'indice_per', 'precio_con']
     adjusted_region.columns = region_columns
 
-    def plot_prices(df):
-        unit = 1/plt.rcParams['figure.dpi']
-        width,height = 800,  300
-        fig, ax = plt.subplots(figsize=(width*unit, height*unit))
-        df.set_index('periodo')['precio_nom'].plot(kind='line', grid=True, color='r')
-        df.set_index('periodo')['precio_con'].plot(kind='line', grid=True, color='b')
-        return fig
+    selected_region = orca.get_injectable('selected_region')
+    adjusted_region['region'] = selected_region
+    table_name = 'selected_{}'.format(selected_region)
+    orca.add_table(table_name, adjusted_region)
+
 
     container = st.container()
-    container.write(adjusted_region)
+    fig1 = plotly_prices(df=adjusted_region)
+    fig2 = plotly_coeff(df=adjusted_region)
 
-    st.write(plot_prices(df=adjusted_region))
+    col1, col2 = st.columns(2)
+    col1.plotly_chart(fig1,use_container_width = True)
+    col2.plotly_chart(fig2,use_container_width = True)
+
+    col3 = st.container()
+    previous_names = orca.list_tables()
+
+    tables = []
+    for n in previous_names:
+        t= orca.get_table(n).to_frame()
+        tables.append(t)
+    compare_against_previous = pd.concat(tables)
+
+    fig3 = plotly_prices(df=compare_against_previous, compare=True)
+    col3.plotly_chart(fig3, use_container_width=True)

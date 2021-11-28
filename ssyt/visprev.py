@@ -11,7 +11,7 @@ import yaml
 import pandas as pd
 from datetime import datetime
 
-def query_properati_data(year,first_month,last_month):
+def query_properati_data(first_year,last_year,first_month,last_month):
     '''
     Query the properati-data-public datasource on Google bigquery
     to get nominal series of rents values in the Buenos Aires
@@ -19,14 +19,33 @@ def query_properati_data(year,first_month,last_month):
 
     Parameters
     ----------
-    year (str): starting year for period filtering
+    first_year (str): starting year for period filtering
+    last_year (str): ending year for period filtering
     first_month (str): starting month for period filtering
     last_month (str): ending period month for period filtering
     ...
     Returns
     pd.DataFrame: long df with period/region/value fields
     '''
-    # call the raw table
+    # price series for maps
+    QUERY0 = """SELECT place.l2 as jurisdiccion,
+                       place.l3 as localidad,
+                       FORMAT_DATE('%m-%Y', start_date) as periodo,
+                       AVG(property.price) AS monto
+                FROM `properati-dw.public.ads`
+                WHERE start_date >= "2015-01-01" AND end_date <= "2021-12-31"
+                AND property.operation = "Alquiler"
+                AND property.currency = "ARS"
+                AND place.l2 IN ('Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte', 'Capital Federal', 'Bs.As. G.B.A. Zona Sur')
+                AND property.type = "Departamento"
+                GROUP BY
+                jurisdiccion,
+                place.l3,
+                periodo
+                ORDER BY
+                periodo DESC"""
+
+    # llamar cada tabla del conjunto de datos
     QUERYI =  """SELECT state_name as jurisdiccion,
                         FORMAT_DATE('%m-%Y', start_date) as periodo,
                         AVG(price) AS monto
@@ -42,8 +61,9 @@ def query_properati_data(year,first_month,last_month):
                  ORDER BY
                    periodo DESC""".format(year, first_month, last_month)
 
-    start_period = year + '-' + first_month + '-01'
-    end_period = year + '-' + last_month + '-01'
+    start_period = first_year + '-' + first_month + '-01'
+    end_period = last_year + '-' + last_month + '-01'
+
     QUERYII = """SELECT place.l2 as jurisdiccion,
                         FORMAT_DATE('%m-%Y', start_date) as periodo,
                         AVG(property.price) AS monto
@@ -68,16 +88,18 @@ def query_properati_data(year,first_month,last_month):
 
     key = service_account.Credentials.from_service_account_file(service_account_key)
     client = bigquery.Client(credentials=key,project=project_id)
-    df = devuelve_consulta(client=client, query=QUERYII) # QUERY I only returns values up to 2018
+
+    # Should work with QUERY I and II. Doesn't chhose I because it only returns values up to 2018
+    df = devuelve_consulta(client=client, query=QUERYII)
 
     return df
 
-def get_properati_data(year,first_month,last_month):
+def get_properati_data(first_year,last_year, first_month,last_month):
     '''
     '''
     df = pd.read_csv('https://storage.googleapis.com/ssyt/data/precios_nominales_2015-21.csv')
-    start_date = year + '-' + first_month
-    end_date = year + '-' + last_month
+    start_date = first_year + '-' + first_month
+    end_date = last_year + '-' + last_month
     df['periodo_date'] = pd.to_datetime(df['periodo'], format='%m-%Y')
     df_f = df.loc[(df['periodo_date']>=start_date) & ((df['periodo_date']<=end_date))].copy()
     df_f.drop(columns='periodo_date', inplace=True)
@@ -122,7 +144,7 @@ def choose_jurisdiction(df, region):
     u_scores = pd.Series(u_score)
     period_form = years + u_scores + months
     gba_region['period'] = period_form
-    
+
     return gba_region
 
 def formatea_isa(isa, serie='indice_salarios'):
