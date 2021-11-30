@@ -5,11 +5,14 @@ import orca
 
 from visprev import *
 from charts import *
+from utils import *
+
 
 st.set_page_config(
-page_title="Systema SYT",
-layout='wide',
-initial_sidebar_state='collapsed')
+    page_title="Systema SyT",
+    page_icon="./sl//favicon.ico",
+    layout='wide',
+    initial_sidebar_state='collapsed')
 
 st.write(
         """
@@ -18,40 +21,60 @@ st.write(
         unsafe_allow_html=True,
     )
 
-menu_list = st.sidebar.radio('Go to', ["INICIO", "SSYT", "VISPAE", "VISPREV", "VISMYA"])
+# CSS
+with open('./sl/style.css') as f:
+    st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
 
-if menu_list == "INICIO":
+
+menu_list = st.sidebar.radio('Secciones', ["Inicio", "SSyT", "Vivienda", "Poblacion", "Accesibilidad"])
+
+if menu_list == "Inicio":
     landing = Image.open('./img/urban_shapes.png')
     st.image(landing, width=700)
     st.header("CEEU - Systema Sociedad y Territorio")
     st.markdown(
         """
-        Las formas de las ciudades, tanto si han sido pensadas específicamente como si son el resultado más o menos espontáneo
-        de dinámicas diferentes, cristalizan y \n
-        reflejan las lógicas de las sociedades que acogen (Ascher Francois, 2004: p20 ). \n
+        _Las formas de las ciudades, tanto si han sido pensadas específicamente como si son el resultado más o menos espontáneo
+        de dinámicas diferentes, cristalizan y reflejan las lógicas de las sociedades que acogen (Ascher Francois, 2004: p20 )._
+        """)
 
-        ```
-        Llamamos Sistema SYT a un conjunto de herramientas diseñadas para analizar y estudiar los principales componentes de las dinámicas \n
-        urbanas de un área metropolitana. La manera en la que la población transita y habita en el espacio de un territorio constituyen, entre otros**, \n
-        eventos determinantes  en la forma de una ciudad. Explorar cómo se comportan y cuáles son sus  peculiaridades de un modo ordenado y a través de componentes \n
-        específicos es el objetivo principal de este proyecto.
-        ```""")
+    st.markdown(" ")
+    st.markdown("""
+                ```
+                Llamamos Sistema SYT a un conjunto de herramientas diseñadas para analizar y estudiar \n
+                los principales componentes de las dinámicas urbanas de un área metropolitana. La manera en la que la población transita y habita \n
+                en el espacio de un territorio constituyen, entre otros, eventos determinantes  \n
+                en la forma de una ciudad. Explorar cómo se comportan y cuáles son sus  peculiaridades de un modo ordenado y a través de componentes \n
+                específicos es el objetivo principal de este proyecto.
+                ```
+    """)
+elif menu_list == "SSyT":
+    st.markdown("""
 
-elif menu_list == "VISPREV":
-    st.subheader('**_Parametros de la consulta_**')
+    * Vivienda: esta seccion permite estudiar la evolución de precios de viviendas del mercado formal de alquileres. La misma se construye
+    en base al conjunto de datos disponibilizado por Properati y ajusta precios por inflación en base al IPC/INDEC ICL/BCR.
 
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    * Poblacion: esta seccion permite estudiar la distribución territorial de un conjunto de variables censales ...
+    * Movilidad: esta seccion (OSMNx/grafos)
 
-    first_year = col1.selectbox('Año de inicio', ['2015','2016','2017','2018','2019','2020','2021'])
-    last_year = col2.selectbox('Año de finalización', ['2015','2016','2017','2018','2019','2020','2021'])
+    """)
+elif menu_list == "Vivienda":
+    st.subheader('Visor de precios de alquiler')
+    st.markdown('Seleccione el período de análisis y el tipo de deflactor para analizar la evolución de precios en la región deseada')
+    st.markdown(' ')
+
+    col1, col2, col3, col4, col5, col6, col7, col8 = st.columns((1,1,1,1,2,2,1,2))
+    selection_year = ['2015','2016','2017','2018','2019','2020','2021'] # to use 2015/2016 see Issue #7
+    first_year = col1.selectbox('Año de inicio', selection_year[2:])
+    last_year = col2.selectbox('Año de finalización', selection_year[2:])
 
     months = ['01','02','03',
               '04','05','06',
               '07','08','09',
               '10','11','12']
 
-    first_month = col3.selectbox('Mes de inicio', months)
-    last_month = col4.selectbox('Mes de finalización', months)
+    first_month = col3.selectbox('Mes de inicio', months, index=0)
+    last_month = col4.selectbox('Mes de finalización', months, index=3)
     df = get_properati_data(first_year, last_year, first_month, last_month)
 
     regions = ['Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte',
@@ -61,10 +84,13 @@ elif menu_list == "VISPREV":
     series = choose_jurisdiction(df, region)
 
     deflactor = col6.selectbox('Deflactor', ['IPC Indec', 'ICL BCRA'])
+    periodo_base = col7.radio( "Mes base", ('2020-3', '2020-7'))
+
     if deflactor == 'IPC Indec':
         ipc_indec = read_ipc()
+        nombre_rubro = col8.selectbox('Rubro IPC', ipc_indec['Región GBA'].unique(), index=0)
         # SE PODRIA CONSUMIR DESDE LA API CKAN
-        salarios = pd.read_csv('https://storage.googleapis.com/ssyt/data/indice-salarios-periodicidad-mensual-base-octubre-2016.csv')
+        salarios = pd.read_csv('https://storage.googleapis.com/ssyt/data/indice-salarios-mensual-base-octubre-2016_2021.csv')
         construye_d_val = True
         d_val = None
 
@@ -72,16 +98,17 @@ elif menu_list == "VISPREV":
         print('ADD CSV ICL BCRA')
         ipc_indec = None
         salarios = None
-        construye_d_val = True
+        construye_d_val = False
         d_val = read_icl()
+        nombre_rubro = None
 
     region_summary = series.apply(lambda x: deflactar_serie(pe=x.period,
                                                             pr=x.price,
-                                                            ba='2020-3',
+                                                            ba=periodo_base,
                                                             construye_d=construye_d_val,
                                                             ipc=ipc_indec,
                                                             isa=salarios,
-                                                            rubro_ipc='Alquiler de la vivienda',
+                                                            rubro_ipc=nombre_rubro,
                                                             d=d_val),
                                                             axis=1)
 
@@ -131,6 +158,23 @@ elif menu_list == "VISPREV":
     else:
         pass
     filtered_points = filter_data_on_period(prices_over_time, first_year, first_month, last_year, last_month)
+    filtered_points['period'] = filtered_points['periodo'].apply(lambda x: reformat_period(x))
 
-    fig4 = plot_graduated_scattermap(points_gdf=filtered_points, polygons_gdf=base_polygons, indicator='monto')
+    points_summary = filtered_points.apply(lambda x: deflactar_serie(pe=x.period,
+                                                                     pr=x.monto,
+                                                                     ba=periodo_base,
+                                                                     construye_d=construye_d_val,
+                                                                     ipc=ipc_indec,
+                                                                     isa=salarios,
+                                                                     rubro_ipc=nombre_rubro,
+                                                                     d=d_val),
+                                                                     axis=1)
+
+    adjusted_points = points_summary.apply(pd.Series)
+    points_columns = ['periodo', 'precio_nom', 'coeficiente', 'indice_base', 'indice_per', 'precio_con']
+    adjusted_points.columns = points_columns
+    filtered_points['$ constantes'] = adjusted_points['precio_con'].astype(int)
+    filtered_points['$ nominales'] = adjusted_points['precio_nom'].astype(int)
+
+    fig4 = plot_graduated_scattermap(points_gdf=filtered_points, polygons_gdf=base_polygons, indicator='$ constantes')
     col4.plotly_chart(fig4, use_container_width=True)

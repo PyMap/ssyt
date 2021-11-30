@@ -146,15 +146,18 @@ def plot_graduated_scattermap(points_gdf, polygons_gdf, indicator):
 
     X,Y = get_polygons_xy(polygons_gdf)
 
+    points_gdf['y'] = points_gdf.geometry.y
+    points_gdf['x'] = points_gdf.geometry.x
     fig = px.scatter_mapbox(points_gdf,
-                            lat=points_gdf.geometry.y,
-                            lon=points_gdf.geometry.x,
+                            lat=points_gdf['y'],
+                            lon=points_gdf['x'],
                             hover_name=hover_ref,
                             size=indicator,
                             animation_frame='periodo',
                             animation_group='localidad',
                             color_discrete_sequence=['#FFFF00'],
-                            hover_data=['monto','periodo'],
+                            hover_data={'$ nominales':True, '$ constantes':True,
+                                        'periodo':True, 'x':False,'y':False},
                             opacity=0.9,
                             height=600)
 
@@ -168,7 +171,7 @@ def plot_graduated_scattermap(points_gdf, polygons_gdf, indicator):
     fig.update_layout(mapbox={'style':"carto-darkmatter",
                               'center': {'lon': lon, 'lat': lat},
                               'zoom':z},
-                      #title_text = 'Indicator<br>({})'.format(indicator),
+                      title_text = 'Evolucion de precios de alquiler por departamento: {}'.format(points_gdf.jurisdiccion.unique()[0]),
                       showlegend = False)
     fig.update_layout(margin={"r":1,"t":75,"l":0,"b":0},
                       mapbox=dict(

@@ -34,3 +34,15 @@ def get_polygons_xy(polygons_gdf):
     X, Y=zip(*pts)
 
     return X, Y
+
+def reformat_period(x):
+  y = x.split('-')[1]
+  m = x.split('-')[0]
+
+  if '0' == m[0]:
+    m = m[1:]
+  else:
+    pass
+
+  period = y+'-'+m
+  return period

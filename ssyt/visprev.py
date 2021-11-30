@@ -175,7 +175,7 @@ def formatea_isa(isa, serie='indice_salarios'):
     return isa_rebase[serie]
 
 def read_icl():
-    icl_bcra = pd.read_excel('https://storage.googleapis.com/ssyt/data/indice_contratos_locacion.xls')
+    icl_bcra = pd.read_excel('https://storage.googleapis.com/ssyt/data/indice_contratos_locacion_nov2021.xls')
     icl_bcra['Mes'] = icl_bcra.Fecha.apply(lambda x: x.split('/')[2] + '-' + x.split('/')[1])
     # reemplazamos las comas y convertimos nuestro valores en float
     icl_bcra['Valor'] = icl_bcra['Valor'].str.replace(',', '.', regex=False)
