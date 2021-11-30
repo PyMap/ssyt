@@ -7,5 +7,6 @@ xlrd
 plotly
 plotly_express
 orca
+geopandas
 
 ../
