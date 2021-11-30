@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import geopandas as gpd
 import orca
 
 from visprev import *
@@ -95,14 +96,15 @@ elif menu_list == "VISPREV":
 
 
     container = st.container()
-    fig1 = plotly_prices(df=adjusted_region)
-    fig2 = plotly_coeff(df=adjusted_region)
+    fig1 = plotly_prices(df=adjusted_region, move_legend=True)
+    fig2 = plotly_coeff(df=adjusted_region, move_legend=True)
 
     col1, col2 = st.columns(2)
     col1.plotly_chart(fig1,use_container_width = True)
     col2.plotly_chart(fig2,use_container_width = True)
 
     col3 = st.container()
+    col4 = st.container()
     previous_names = orca.list_tables()
 
     tables = []
@@ -111,5 +113,24 @@ elif menu_list == "VISPREV":
         tables.append(t)
     compare_against_previous = pd.concat(tables)
 
-    fig3 = plotly_prices(df=compare_against_previous, compare=True)
+    fig3 = plotly_prices(df=compare_against_previous, compare=True, move_legend=False)
     col3.plotly_chart(fig3, use_container_width=True)
+
+    if region == 'Capital Federal':
+        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/caba_nominales_012015_072021.zip')
+        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/caba_barrios.zip')
+    elif region ==  'Bs.As. G.B.A. Zona Oeste':
+        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/zoeste_012015_072021.zip')
+        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/zoeste_deptos.zip')
+    elif region == 'Bs.As. G.B.A. Zona Norte':
+        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/znorte_nominales_012015_072021.zip')
+        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/znorte_deptos.zip')
+    elif region == 'Bs.As. G.B.A. Zona Sur':
+        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/zsur_nominales_012015_072021.zip')
+        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/zsur_deptos.zip')
+    else:
+        pass
+    filtered_points = filter_data_on_period(prices_over_time, first_year, first_month, last_year, last_month)
+
+    fig4 = plot_graduated_scattermap(points_gdf=filtered_points, polygons_gdf=base_polygons, indicator='monto')
+    col4.plotly_chart(fig4, use_container_width=True)
