@@ -4,6 +4,7 @@ import geopandas as gpd
 import orca
 
 from visprev import *
+from datasources import *
 from charts import *
 from utils import *
 
@@ -90,7 +91,7 @@ elif menu_list == "Vivienda":
         ipc_indec = read_ipc()
         nombre_rubro = col8.selectbox('Rubro IPC', ipc_indec['Región GBA'].unique(), index=0)
         # SE PODRIA CONSUMIR DESDE LA API CKAN
-        salarios = pd.read_csv('https://storage.googleapis.com/ssyt/data/indice-salarios-mensual-base-octubre-2016_2021.csv')
+        salarios = get_wages()
         construye_d_val = True
         d_val = None
 
@@ -144,17 +145,17 @@ elif menu_list == "Vivienda":
     col3.plotly_chart(fig3, use_container_width=True)
 
     if region == 'Capital Federal':
-        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/caba_nominales_012015_072021.zip')
-        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/caba_barrios.zip')
+        prices_over_time = get_nominal_prices_over_time_caba()
+        base_polygons = caba_neighborhood_limits()
     elif region ==  'Bs.As. G.B.A. Zona Oeste':
-        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/zoeste_012015_072021.zip')
-        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/zoeste_deptos.zip')
+        prices_over_time = nominal_prices_over_time_gba_oeste()
+        base_polygons = gba_oeste_dept_limits()
     elif region == 'Bs.As. G.B.A. Zona Norte':
-        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/znorte_nominales_012015_072021.zip')
-        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/znorte_deptos.zip')
+        prices_over_time = nominal_prices_over_time_gba_norte()
+        base_polygons = gba_norte_dept_limits()
     elif region == 'Bs.As. G.B.A. Zona Sur':
-        prices_over_time = gpd.read_file('https://storage.googleapis.com/ssyt/data/zsur_nominales_012015_072021.zip')
-        base_polygons = gpd.read_file('https://storage.googleapis.com/ssyt/data/zsur_deptos.zip')
+        prices_over_time = nominal_prices_over_time_gba_sur()
+        base_polygons = gba_sur_dept_limits()
     else:
         pass
     filtered_points = filter_data_on_period(prices_over_time, first_year, first_month, last_year, last_month)

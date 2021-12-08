@@ -7,6 +7,7 @@ from google.oauth2 import service_account
 import streamlit as st
 import os
 from utils import *
+from datasources import *
 import yaml
 import pandas as pd
 from datetime import datetime
@@ -61,6 +62,20 @@ def query_properati_data(first_year,last_year,first_month,last_month):
                  ORDER BY
                    periodo DESC""".format(year, first_month, last_month)
 
+    # lat/lon for density
+    QUERYIII = """SELECT place.lat as latitud,
+                         place.lon as longitud,
+                         place.l3 as localidad,
+                         FORMAT_DATE('%m-%Y', start_date) as periodo,
+                  FROM `properati-dw.public.ads`
+                  WHERE start_date >= "2015-01-01" AND end_date <= "2021-12-31"
+                  AND property.operation = "Alquiler"
+                  AND property.currency = "ARS"
+                  AND place.l2 IN ('Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte', 'Capital Federal', 'Bs.As. G.B.A. Zona Sur')
+                  AND property.type = "Departamento"
+                  ORDER BY
+                  periodo DESC"""
+
     start_period = first_year + '-' + first_month + '-01'
     end_period = last_year + '-' + last_month + '-01'
 
@@ -97,7 +112,7 @@ def query_properati_data(first_year,last_year,first_month,last_month):
 def get_properati_data(first_year,last_year, first_month,last_month):
     '''
     '''
-    df = pd.read_csv('https://storage.googleapis.com/ssyt/data/precios_nominales_2015-21.csv')
+    df = get_nominal_prices_from_2015_to_2021()
     start_date = first_year + '-' + first_month
     end_date = last_year + '-' + last_month
     df['periodo_date'] = pd.to_datetime(df['periodo'], format='%m-%Y')
@@ -175,7 +190,7 @@ def formatea_isa(isa, serie='indice_salarios'):
     return isa_rebase[serie]
 
 def read_icl():
-    icl_bcra = pd.read_excel('https://storage.googleapis.com/ssyt/data/indice_contratos_locacion_nov2021.xls')
+    icl_bcra = get_icl_bcra()
     icl_bcra['Mes'] = icl_bcra.Fecha.apply(lambda x: x.split('/')[2] + '-' + x.split('/')[1])
     # reemplazamos las comas y convertimos nuestro valores en float
     icl_bcra['Valor'] = icl_bcra['Valor'].str.replace(',', '.', regex=False)
@@ -192,8 +207,8 @@ def aperturas_ipc_indec(df, rubro):
     return apertura_elegida
 
 def read_ipc():
-    ipc_crudo = pd.read_excel('https://storage.googleapis.com/ssyt/data/sh_ipc_aperturas.xls',
-                              sheet_name='Variación mensual aperturas', header=None)
+    ipc_crudo = get_ipc_indec()
+
     # hacemos slicing desde las filas 5 a la 53, el IPC para GBA
     ipc_crudo = ipc_crudo.iloc[5:53].copy()
     # renombramos columnas
