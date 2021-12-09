@@ -193,7 +193,10 @@ def read_icl():
     icl_bcra = get_icl_bcra()
     icl_bcra['Mes'] = icl_bcra.Fecha.apply(lambda x: x.split('/')[2] + '-' + x.split('/')[1])
     # reemplazamos las comas y convertimos nuestro valores en float
-    icl_bcra['Valor'] = icl_bcra['Valor'].str.replace(',', '.', regex=False)
+    try:
+        icl_bcra['Valor'] = icl_bcra['Valor'].str.replace(',', '.', regex=False)
+    except:
+        icl_bcra['Valor'] = icl_bcra['Valor'].astype(str).replace(',', '.', regex=False)
     icl_bcra['Valor'] = icl_bcra.Valor.apply(lambda x: float(x))
     icl_bcra = icl_bcra.drop_duplicates(subset='Mes', keep='last')
     icl_bcra = icl_bcra[['Valor','Mes']].set_index('Mes')
