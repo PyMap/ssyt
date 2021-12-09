@@ -8,7 +8,7 @@ def get_nominal_prices_from_2015_to_2021():
     df = pd.read_csv('data/precios_nominales_2015-21.csv')
     return df
 
-@st.cache()
+@st.cache(allow_output_mutation=True)
 def get_icl_bcra():
     '''
     Indice de Contratos de Locacion - BCRA
@@ -16,7 +16,7 @@ def get_icl_bcra():
     df = pd.read_excel('data/indice_contratos_locacion_nov2021.xls')
     return df
 
-@st.cache()
+@st.cache(allow_output_mutation=True)
 def get_ipc_indec():
     '''
     Indice de precios al consumidor - INDEC
@@ -72,3 +72,49 @@ def gba_norte_dept_limits():
 def gba_sur_dept_limits():
     gdf = gpd.read_file('data/zsur_deptos.zip')
     return gdf
+
+@st.cache(allow_output_mutation=True)
+def caba_rents_offer():
+    df = pd.read_csv('data/caba_rents_offer.csv')
+    return df
+
+@st.cache(allow_output_mutation=True)
+def gba_oeste_rents_offer():
+    df = pd.read_csv('data/gbaoeste_rents_offer.csv')
+    return df
+
+@st.cache(allow_output_mutation=True)
+def gba_norte_rents_offer():
+    df = pd.read_csv('data/gbanorte_rents_offer.csv')
+    return df
+
+@st.cache(allow_output_mutation=True)
+def gba_sur_rents_offer():
+    df = pd.read_csv('data/gbasur_rents_offer.csv')
+    return df
+
+@st.cache(allow_output_mutation=True)
+def adjust_prices_by_inflation_table(df, index_name,base):
+    df_ = df.rename(columns={'indice_per':'{}'.format(index_name.lower()),
+                             'indice_base': '{}'.format(index_name.lower())+' base'+'('+base+')',
+                             'precio_nom':'$ARS nominales',
+                             'precio_con':'$ARS constantes',
+                             'coeficiente': 'Coeficiente de ajuste',
+                             'region':'Region',
+                             'periodo':'Periodo'})
+
+    df_['$ARS constantes (%)'] = round(df_['$ARS constantes'].pct_change() * 100, 2)
+    df_['{}'.format(index_name)+'(%)'] = round(df_['{}'.format(index_name.lower())].pct_change() * 100, 2)
+
+    columns = ['Periodo', '$ARS nominales',
+               '{}'.format(index_name.lower()),
+               '{}'.format(index_name.lower())+' base'+'('+base+')',
+               'Coeficiente de ajuste',
+               '$ARS constantes',
+               '{}'.format(index_name)+'(%)',
+               '$ARS constantes (%)'
+               ]
+
+    df__ = df_[columns]
+
+    return df__
