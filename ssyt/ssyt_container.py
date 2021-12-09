@@ -66,16 +66,16 @@ elif menu_list == "Vivienda":
 
     col1, col2, col3, col4, col5, col6, col7, col8 = st.columns((1,1,1,1,2,2,1,2))
     selection_year = ['2015','2016','2017','2018','2019','2020','2021'] # to use 2015/2016 see Issue #7
-    first_year = col1.selectbox('Año de inicio', selection_year[2:])
-    last_year = col2.selectbox('Año de finalización', selection_year[2:])
+    first_year = col1.selectbox('Año inicio', selection_year[2:], index=3)
+    last_year = col2.selectbox('Año fin', selection_year[2:], index=4)
 
     months = ['01','02','03',
               '04','05','06',
               '07','08','09',
               '10','11','12']
 
-    first_month = col3.selectbox('Mes de inicio', months, index=0)
-    last_month = col4.selectbox('Mes de finalización', months, index=3)
+    first_month = col3.selectbox('Mes inicio', months, index=6)
+    last_month = col4.selectbox('Mes fin', months, index=11)
     df = get_properati_data(first_year, last_year, first_month, last_month)
 
     regions = ['Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte',
@@ -85,7 +85,7 @@ elif menu_list == "Vivienda":
     series = choose_jurisdiction(df, region)
 
     deflactor = col6.selectbox('Deflactor', ['IPC Indec', 'ICL BCRA'])
-    periodo_base = col7.radio( "Mes base", ('2020-3', '2020-7'))
+    periodo_base = col7.radio( "Mes base", ('2020-7', '2020-3'))
 
     if deflactor == 'IPC Indec':
         ipc_indec = read_ipc()
@@ -125,14 +125,21 @@ elif menu_list == "Vivienda":
 
     container = st.container()
     fig1 = plotly_prices(df=adjusted_region, move_legend=True)
-    fig2 = plotly_coeff(df=adjusted_region, move_legend=True)
+    fig2 = plotly_percent_change(df=adjusted_region, index_name=deflactor, move_legend=True)
 
     col1, col2 = st.columns(2)
     col1.plotly_chart(fig1,use_container_width = True)
     col2.plotly_chart(fig2,use_container_width = True)
 
+    with st.expander("Inspeccionar ajuste de precios"):
+     st.write("""
+         La tabla que se presenta a continuación detalla la tranformación
+         realizada por el índice y el período base seleccionados en el menú.
+     """)
+     st.write(adjust_prices_by_inflation_table(df=adjusted_region, index_name=deflactor, base=periodo_base))
+
     col3 = st.container()
-    col4 = st.container()
+    col4, col5 = st.columns((2,2))
     previous_names = orca.list_tables()
 
     tables = []
@@ -145,16 +152,20 @@ elif menu_list == "Vivienda":
     col3.plotly_chart(fig3, use_container_width=True)
 
     if region == 'Capital Federal':
-        prices_over_time = get_nominal_prices_over_time_caba()
+        prices_over_time = nominal_prices_over_time_caba()
+        offer_df = caba_rents_offer()
         base_polygons = caba_neighborhood_limits()
     elif region ==  'Bs.As. G.B.A. Zona Oeste':
         prices_over_time = nominal_prices_over_time_gba_oeste()
+        offer_df = gba_oeste_rents_offer()
         base_polygons = gba_oeste_dept_limits()
     elif region == 'Bs.As. G.B.A. Zona Norte':
         prices_over_time = nominal_prices_over_time_gba_norte()
+        offer_df = gba_norte_rents_offer()
         base_polygons = gba_norte_dept_limits()
     elif region == 'Bs.As. G.B.A. Zona Sur':
         prices_over_time = nominal_prices_over_time_gba_sur()
+        offer_df = gba_sur_rents_offer()
         base_polygons = gba_sur_dept_limits()
     else:
         pass
@@ -179,3 +190,7 @@ elif menu_list == "Vivienda":
 
     fig4 = plot_graduated_scattermap(points_gdf=filtered_points, polygons_gdf=base_polygons, indicator='$ constantes')
     col4.plotly_chart(fig4, use_container_width=True)
+
+    filtered_offer = filter_data_on_period(offer_df, first_year, first_month, last_year, last_month)
+    fig5 = plot_density_scatter_map(points_df=filtered_offer, polygons_gdf=base_polygons)
+    col5.plotly_chart(fig5, use_container_width=True)
