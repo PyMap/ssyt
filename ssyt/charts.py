@@ -127,6 +127,59 @@ def plotly_coeff(df, move_legend=False):
 
     return fig
 
+def plotly_percent_change(df, index_name, move_legend=False):
+
+    df_ = df[['periodo', 'indice_per', 'precio_con', 'precio_nom']].copy()
+
+    df_.rename(columns={'indice_per':'indice periodo',
+                        'precio_nom':'precios_nominales',
+                        'precio_con':'precios constantes'}, inplace=True)
+
+    df_['Precios constantes (%)'] = df_['precios constantes'].pct_change() * 100
+    df_['Indice de ajuste (%)'] = df_['indice periodo'].pct_change() * 100
+
+    fig = go.Figure(data=[
+        go.Bar(name='Evolucion $ARS constantes (%)', x=df_['periodo'],
+               y=df_['Precios constantes (%)'],
+               hovertemplate="$ARS constantes: %{y:.2f}% <extra></extra>",
+               marker={"color": "rgba(240, 240, 240, 1.0)", "line": {"width": 0}}),
+               ])
+
+    fig.update_traces(marker_color='#ADD8E6', marker_line_color='#1E3F66',
+                      marker_line_width=1.5, opacity=0.6)
+
+    fig.add_trace(
+        go.Scatter(
+            x=df_['periodo'],
+            y=df_['Indice de ajuste (%)'],
+            mode='lines+markers',
+            name='Evolucion {} (%)'.format(index_name),
+            marker_color='#000000',
+            hovertemplate = '{}'.format(index_name)+': %{y:.2f}% <extra></extra>'))
+
+    fig.update_layout(autosize=True,
+                      width=800,
+                      height=350,
+                      plot_bgcolor ='white',
+                      hoverlabel=dict(bgcolor="white"),
+                      yaxis=None,
+                      xaxis=None)
+
+    if move_legend:
+        fig.update_layout(legend=dict(
+                                      orientation="h",
+                                      yanchor="bottom",
+                                      y=-0.4,
+                                      xanchor="right",
+                                      x=1,
+                                     ))
+
+    fig.update_yaxes(showline=True, linecolor='black', ticksuffix = "%", title='Cambio porcentual')
+    fig.update_xaxes(showline=True, linecolor='black')
+
+    return fig
+
+
 def plot_graduated_scattermap(points_gdf, polygons_gdf, indicator):
     '''
     Plots prices over time
@@ -179,4 +232,45 @@ def plot_graduated_scattermap(points_gdf, polygons_gdf, indicator):
                                   bearing=0
                               ))
 
+    return fig
+
+
+def plot_density_scatter_map(points_df, polygons_gdf):
+    if 'COMUNA' in polygons_gdf.columns:
+      z = 10
+    else:
+      z = 8
+
+    x = points_df.longitud.mean()
+    y = points_df.latitud.mean()
+
+    fig = px.density_mapbox(points_df,
+                            lat="latitud",
+                            lon="longitud", hover_name="region",
+                            hover_data={'periodo':True, 'latitud':False,'longitud':False},
+                            animation_frame="periodo",
+                            opacity=0.7,
+                            zoom=z, height=600)
+
+    fig.update_layout(
+        mapbox_layers=[{
+                "source": json.loads(polygons_gdf.geometry.to_json()),
+                "below": "traces",
+                "type": "line",
+                "color": "red",
+                "line": {"width": 0.5},
+            },
+        ],
+        mapbox_style="carto-darkmatter",
+        mapbox = {'center': {'lon': x, 'lat': y - 0.025}},
+        title_text = 'Oferta de departamento en alquiler: {}'.format(points_df.region.unique()[0])
+
+    )
+
+
+    fig.update_layout(margin={"r":1,"t":75,"l":0,"b":0},
+                      mapbox=dict(
+                                  pitch=0,
+                                  bearing=0
+                              ))
     return fig
