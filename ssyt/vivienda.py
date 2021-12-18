@@ -1,5 +1,5 @@
 ##########################################
-# VISPREV - Visor de precios de vivienda #
+# Mercado formal de vivienda en alquiler #
 ##########################################
 from google.cloud import bigquery
 from google.oauth2 import service_account
@@ -265,18 +265,15 @@ def deflactar_serie(pe,pr,ba, # en primer lugar, fijense que renombramos varios 
     precio_nominal = pr
     periodo_base = ba
 
-    if construye_d: # si esto evalua a True
+    if construye_d:
         precios = aperturas_ipc_indec(ipc, rubro_ipc)
         salarios = formatea_isa(isa, rubro_isa)
-        serie = salarios/precios.mean() # entonces construimos nuestro deflactor,
-                                        # en nuestro caso expresamos las variaciones mensuales
-                                        # de los salarios en función del promedio de las
-                                        # variaciones de precios
+        serie = salarios/precios.mean()
 
     else:
-        serie = d # sino, usamos uno ya armado (como el ICL)
+        serie = d # ICL instead
 
-    # en esta seccion deflactamos
+    # adjust by inflation
     serie_periodo = serie.loc[periodo]
     serie_base = serie.loc[periodo_base]
     coeficiente = serie_periodo/serie_base
