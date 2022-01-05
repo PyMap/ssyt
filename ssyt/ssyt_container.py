@@ -28,39 +28,123 @@ with open('./sl/style.css') as f:
     st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
 
 
-menu_list = st.sidebar.radio('Secciones', ["Inicio", "SSyT", "Vivienda", "Poblacion", "Accesibilidad"])
+menu_list = st.sidebar.radio('Secciones', ["Inicio", "Condiciones habitacionales", "Mercado de alquileres", "Informalidad urbana"])
 
 if menu_list == "Inicio":
-    landing = Image.open('./img/urban_shapes.png')
-    st.image(landing, width=700)
-    st.header("CEEU - Systema Sociedad y Territorio")
-    st.markdown(
-        """
-        _Las formas de las ciudades, tanto si han sido pensadas específicamente como si son el resultado más o menos espontáneo
-        de dinámicas diferentes, cristalizan y reflejan las lógicas de las sociedades que acogen (Ascher Francois, 2004: p20 )._
-        """)
 
-    st.markdown(" ")
-    st.markdown("""
+    col1, _ ,col3 = st.columns((2,0.5,2))
+
+    col1.header("SSyT - Sociedad y Territorio")
+
+    col1.markdown("""
                 ```
-                Llamamos Sistema SYT a un conjunto de herramientas diseñadas para analizar y estudiar \n
-                los principales componentes de las dinámicas urbanas de un área metropolitana. La manera en la que la población transita y habita \n
-                en el espacio de un territorio constituyen, entre otros, eventos determinantes  \n
-                en la forma de una ciudad. Explorar cómo se comportan y cuáles son sus  peculiaridades de un modo ordenado y a través de componentes \n
-                específicos es el objetivo principal de este proyecto.
+                > Llamamos Sistema SyT a un conjunto de herramientas diseñadas para
+                analizar y estudiar las dinámicas urbanas de un área metropolitana.
+                Para explorar cómo se comportan y cuáles son sus  peculiaridades se
+                propone un abordaje ordenado a través de componentes específicos.\n
+
+                Cada uno de ellos facilita un visor de resultados donde se pueden
+                consultar las métricas principales de las dinámicas estudiadas.
+                Este demo se concentra en el área metropolitana de Buenos Aires
+                y contiene sólo algunos componentes a modo de ejemplo. El marco de
+                trabajo es lo suficientemente flexible como para definir nuevos
+                componentes, reemplazar los existentes o cambiar la región
+                de análisis.
                 ```
     """)
-elif menu_list == "SSyT":
+
+    landing = Image.open('./img/silueta_urbana.jpg')
+    col3.image(landing, width=450)
+
+    st.subheader('** Componentes de análisis**')
     st.markdown("""
 
-    * Vivienda: esta seccion permite estudiar la evolución de precios de viviendas del mercado formal de alquileres. La misma se construye
-    en base al conjunto de datos disponibilizado por Properati y ajusta precios por inflación en base al IPC/INDEC ICL/BCR.
+    * **Condiciones habitacionales**:
+        ```
+        - esta seccion permite estudiar la distribución territorial de un conjunto de variables censales. Todas ellas, vinculadas
+        a las características de las viviendas y ubicación en el espacio. Se proponen índices simples y complejos para su estudio.
+        Las fuentes de información principal son el CNPHV - 2010 y el Precenso de Viviendas del INDEC.
+        ```
 
-    * Poblacion: esta seccion permite estudiar la distribución territorial de un conjunto de variables censales ...
-    * Movilidad: esta seccion (OSMNx/grafos)
+    * **Mercado de alquileres**:
+        ```
+        - esta seccion permite estudiar la evolución de precios de viviendas del mercado formal de alquileres. La misma se construye
+          en base al conjunto de datos disponibilizado por Properati y ajusta precios por inflación en base al IPC/INDEC ICL/BCR.
+        ```
 
+    * **Informalidad urbana**:
+        ```
+        - definir
+        ```
     """)
-elif menu_list == "Vivienda":
+
+
+elif menu_list == "Condiciones habitacionales":
+    st.subheader('Visor de patrones de asentamiento')
+    st.markdown('Seleccione una variable censal para analizar su distribución en la región deseada')
+    st.markdown(' ')
+
+    col1, col2, col3, col4 = st.columns((1,1,1,1))
+    regions = ['Capital Federal', 'Bs.As. G.B.A. Zona Oeste', 'Bs.As. G.B.A. Zona Norte', 'Bs.As. G.B.A. Zona Sur']
+    region = col1.selectbox('Region', regions)
+
+    indicators = ['Calidad constructiva de la vivienda', 'Calidad de conexiones a servicios básicos',
+                  'Viviendas en construcción', 'Viviendas en altura', 'Viviendas en áreas de difícil acceso']
+    indicator = col2.selectbox('Indicador', indicators)
+
+    if indicator == 'Calidad constructiva de la vivienda':
+        with st.expander("Inspeccionar indicador"):
+         st.write("""
+             Según el Censo 2010, la calidad de la vivienda se encuentra determinada por dos tipos de materiales: los predominantes
+             en los pisos y cubierta exterior de sus techos. Así, el indicador se estructura en cuatro calidades (para una lectura más
+             detallada sobre las mismas se puede consultar la [siguiente documentación](https://www.indec.gob.ar/ftp/cuadros/poblacion/informe_calmat_2001_2010.pdf).
+             El indicador propuesto agrupa las calidades III y IV como irrecuperables y mantiene las I y II como aceptables y recuperables respectivamente.
+             Para el análisis de distribución territorial, se utiliza el [índice de Duncan](https://www.scielo.cl/scielo.php?script=sci_arttext&pid=S0250-71612006000300004)
+             (comunmente utilizado en el estudio de segregación territorial).
+             Este describe la manera en la que se distribuye un grupo en el espacio a partir de la relación entre distintos niveles administrativos
+             (uno de mayor y otro de menor agregación). El mismo varía entre cero y uno indicando distribuciones igualitarias o de máxima concentración.
+             El valor cero sólo se alcanza cuando en todas las unidades hay la misma proporción entre el grupo estudiado y el resto de población.
+         """)
+
+    if (indicator == 'Calidad constructiva de la vivienda') and (region == 'Capital Federal'):
+
+        area_superior = col3.selectbox('Area superior', ['barrio','comuna'])
+        categoria_inmat = col4.selectbox('Categoría', ['recuperables', 'irrecuperables', 'aceptables'])
+
+        radios_geom = radios_caba_2010()
+        radios_vals = inmat_radios_caba_2010()
+
+    elif (indicator == 'Calidad constructiva de la vivienda') and (region != 'Capital Federal'):
+
+        area_superior = col3.selectbox('Area superior', ['departamento'])
+        categoria_inmat = col4.selectbox('Categoría', ['aceptables', 'recuperables', 'irrecuperables'])
+        radios_geom = radios_gba24_2010().to_crs(4326)
+        radios_vals = inmat_radios_gba24_2010()
+
+    else:
+        pass
+
+    inmat_inf = radios_inmat_2010(region_name=region, geog=radios_geom, vals=radios_vals)
+
+    col5, col6 = st.columns((1,1))
+    fig1 = construye_territorio(gdf=inmat_inf, nombre_unidad_s=area_superior, nombre_unidad_i='str_link',
+                                nombre_variable='total_inmat', nombre_categoria=categoria_inmat, estadistico='CEC', tipo='bar', dinamico=True)
+
+    fig2 = construye_territorio(gdf=inmat_inf, nombre_unidad_s=area_superior, nombre_unidad_i='str_link',
+                                nombre_variable='total_inmat', nombre_categoria=categoria_inmat, estadistico='CEC', tipo='scatter', dinamico=True)
+
+    col5.plotly_chart(fig1, use_container_width=True)
+    col6.plotly_chart(fig2, use_container_width=True)
+
+    territorio_superior = construye_territorio(gdf=inmat_inf, nombre_unidad_s=area_superior, nombre_unidad_i='str_link',
+                                               nombre_variable='total_inmat', nombre_categoria=categoria_inmat, estadistico=None, tipo=None)
+
+    inmat_sup = indice_geografia_superior(territorio_df=territorio_superior, nombre_area=area_superior, nombre_region=region)
+    fig3 = plot_folium_dual_choroplet(gdf_inferior=inmat_inf, gdf_superior=inmat_sup, categoria=categoria_inmat,
+                                      indicador_superior='CEC', nombre_superior=area_superior, nombre_region=region)
+    folium_static(fig3, width=1350, height=500)
+
+elif menu_list == "Mercado de alquileres":
     st.subheader('Visor de precios de alquiler')
     st.markdown('Seleccione el período de análisis y el tipo de deflactor para analizar la evolución de precios en la región deseada')
     st.markdown(' ')
