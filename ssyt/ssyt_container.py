@@ -4,7 +4,7 @@ import geopandas as gpd
 import orca
 
 from vivienda import *
-from poblacion import *
+from contexto_urbano import *
 from datasources import *
 from charts import *
 from utils import *
@@ -279,20 +279,3 @@ elif menu_list == "Mercado de alquileres":
     filtered_offer = filter_data_on_period(offer_df, first_year, first_month, last_year, last_month)
     fig5 = plot_density_scatter_map(points_df=filtered_offer, polygons_gdf=base_polygons)
     col5.plotly_chart(fig5, use_container_width=True)
-
-elif menu_list == "Poblacion":
-    radios_inmat = gpd.read_file('https://storage.googleapis.com/python_mdg/carto_cursos/radios_inmat.zip')
-    # renombramos algunas columnas
-    radios_inmat.rename(columns= {'acept':'aceptables',
-                                  'reup':'recuperables',
-                                  'irrecup':'irrecuperables'}, inplace=True)
-
-    # podemos ver el índice de concentración para otra categoría de viviendas por barrio
-    st.write(construye_territorio(gdf=radios_inmat, nombre_unidad_s='COMUNA', nombre_unidad_i='RADIO_I',
-                                  nombre_variable='VIVIEND', nombre_categoria='recuperables', estadistico=None, tipo=None))
-
-    st.write(construye_territorio(gdf=radios_inmat, nombre_unidad_s='COMUNA', nombre_unidad_i='RADIO_I',
-                                  nombre_variable='VIVIEND', nombre_categoria='recuperables', estadistico='CEC', tipo='bar'))
-
-    st.write(construye_territorio(gdf=radios_inmat, nombre_unidad_s='COMUNA', nombre_unidad_i='RADIO_I',
-                                  nombre_variable='VIVIEND', nombre_categoria='recuperables', estadistico='CEC', tipo='scatter'))

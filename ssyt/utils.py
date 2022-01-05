@@ -1,7 +1,7 @@
 import json
 import pandas as pd
-### VISPREV UTILS ###
 
+### VISPREV UTILS ###
 def devuelve_consulta(client, query):
     query_job = client.query(query)
     df = query_job.result().to_dataframe()
@@ -46,3 +46,13 @@ def reformat_period(x):
 
   period = y+'-'+m
   return period
+
+#URBAN CONTEXT UTILS#
+def reformat_inmat_2010(gdf):
+    gdf['aceptables'] = gdf['Cal1']
+    gdf['recuperables'] = gdf['Cal2']
+    gdf['irrecuperables'] = gdf['Cal3'] + gdf['Cal4']
+    gdf['total_inmat'] = gdf['aceptables'] + gdf['recuperables'] + gdf['irrecuperables']
+    columns = [c for c in gdf.columns if c != 'geometry']
+    gdf_ = gdf[columns + ['geometry']]
+    return gdf_

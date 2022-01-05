@@ -59,6 +59,11 @@ def caba_neighborhood_limits():
     return gdf
 
 @st.cache(allow_output_mutation=True)
+def caba_comunas_limits():
+    gdf = gpd.read_file('data/caba_comunas.zip')
+    return gdf
+
+@st.cache(allow_output_mutation=True)
 def gba_oeste_dept_limits():
     gdf = gpd.read_file('data/zoeste_deptos.zip')
     return gdf
@@ -118,3 +123,23 @@ def adjust_prices_by_inflation_table(df, index_name,base):
     df__ = df_[columns]
 
     return df__
+
+@st.cache(allow_output_mutation=True)
+def radios_gba24_2010():
+    radios = gpd.read_file('data/radios_2010_gba24.zip')
+    return radios
+
+@st.cache(allow_output_mutation=True)
+def radios_caba_2010():
+    radios = gpd.read_file('data/radios_2010_caba.zip')
+    return radios
+
+@st.cache(allow_output_mutation=True)
+def inmat_radios_gba24_2010():
+    inmat_por_radio = pd.read_csv('data/inmat_gba24.csv')
+    return inmat_por_radio
+
+@st.cache(allow_output_mutation=True)
+def inmat_radios_caba_2010():
+    inmat_por_radio = pd.read_csv('data/inmat_caba.csv')
+    return inmat_por_radio
