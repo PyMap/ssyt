@@ -8,5 +8,9 @@ plotly
 plotly_express
 orca
 geopandas
+folium
+streamlit_folium
+mapclassify
+rtree
 
 -e ../
