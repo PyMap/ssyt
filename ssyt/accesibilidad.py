@@ -5,7 +5,7 @@ import branca.colormap as cm
 import numpy as np
 
 def build_graph_by_name(place, network_type):
-    ox.config(log_file=False, log_console=False, use_cache=True)
+    ox.config(log_file=False, log_console=False, use_cache=False)
     G = ox.graph_from_address(place,network_type=network_type)
     return G
 

@@ -8,7 +8,7 @@ import numpy as np
 def build_street_network(category_name, ref, buffer_dist):
     """
     """
-    ox.config(log_file=False, log_console=False, use_cache=True)
+    ox.config(log_file=False, log_console=False, use_cache=False)
     G = ox.graph_from_point(center_point=ref, dist=buffer_dist,
                             dist_type='network', network_type=category_name)
     return G
