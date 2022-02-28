@@ -62,7 +62,7 @@ if menu_list == "Inicio":
     st.subheader('**Componentes de análisis**')
     st.markdown("""
 
-    * **Poablacion**:
+    * **Poblacion**:
         ```
         - esta seccion permite estudiar la distribución territorial de un conjunto de variables censales. Todas ellas, vinculadas
         a las características de la población y su distribucion en el espacio urbano.
@@ -83,7 +83,7 @@ if menu_list == "Inicio":
     * **Accesibilidad**:
         ```
         - esta seccion permite construir una red de calles y evaluar el grado de accesibilidad a cada punto de la misma a
-          partir de la construccion de isocronas con el tiempo de viaje desde cada uno de sus nodos. 
+          partir de la construccion de isocronas con el tiempo de viaje desde cada uno de sus nodos.
         ```
     """)
 
