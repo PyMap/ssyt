@@ -31,7 +31,7 @@ with open('./sl/style.css') as f:
     st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
 
 
-menu_list = st.sidebar.radio('Secciones', ["Inicio", "Condiciones habitacionales", "Mercado de alquileres", "Mobilidad urbana", "Accesibilidad"])
+menu_list = st.sidebar.radio('Secciones', ["Inicio", "Poblacion", "Mercado Inmobiliario", "Mobilidad urbana", "Accesibilidad"])
 
 if menu_list == "Inicio":
 
@@ -59,25 +59,31 @@ if menu_list == "Inicio":
     landing = Image.open('./img/silueta_urbana.jpg')
     col3.image(landing, width=450)
 
-    st.subheader('** Componentes de análisis**')
+    st.subheader('**Componentes de análisis**')
     st.markdown("""
 
-    * **Condiciones habitacionales**:
+    * **Poablacion**:
         ```
         - esta seccion permite estudiar la distribución territorial de un conjunto de variables censales. Todas ellas, vinculadas
-        a las características de las viviendas y ubicación en el espacio. Se proponen índices simples y complejos para su estudio.
-        Las fuentes de información principal son el CNPHV - 2010 y el Precenso de Viviendas del INDEC.
+        a las características de la población y su distribucion en el espacio urbano.
         ```
 
-    * **Mercado de alquileres**:
+    * **Mercado Inmobiliario**:
         ```
-        - esta seccion permite estudiar la evolución de precios de viviendas del mercado formal de alquileres. La misma se construye
+        - esta seccion permite estudiar la evolución de precios de viviendas en el mercado formal de alquileres. La misma se construye
           en base al conjunto de datos disponibilizado por Properati y ajusta precios por inflación en base al IPC/INDEC ICL/BCR.
         ```
 
-    * **Informalidad urbana**:
+    * **Mobilidad urbana**:
         ```
-        - definir
+        - esta seccion permite estudiar el nivel de conectividad de una red de calles. Esto, mediante la construccion de distintas
+          metricas de centralidad y de la identificacion de los caminos mas cortos entre los nodos de la red.
+        ```
+
+    * **Accesibilidad**:
+        ```
+        - esta seccion permite construir una red de calles y evaluar el grado de accesibilidad a cada punto de la misma a
+          partir de la construccion de isocronas con el tiempo de viaje desde cada uno de sus nodos. 
         ```
     """)
 
