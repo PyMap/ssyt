@@ -88,7 +88,7 @@ if menu_list == "Inicio":
     """)
 
 
-elif menu_list == "Condiciones habitacionales":
+elif menu_list == "Poblacion":
     st.subheader('Visor de patrones de asentamiento')
     st.markdown('Seleccione una variable censal para analizar su distribución en la región deseada')
     st.markdown(' ')
@@ -153,7 +153,7 @@ elif menu_list == "Condiciones habitacionales":
                                       indicador_superior='CEC', nombre_superior=area_superior, nombre_region=region)
     folium_static(fig3, width=1350, height=500)
 
-elif menu_list == "Mercado de alquileres":
+elif menu_list == "Mercado Inmobiliario":
     st.subheader('Visor de precios de alquiler')
     st.markdown('Seleccione el período de análisis y el tipo de deflactor para analizar la evolución de precios en la región deseada')
     st.markdown(' ')
