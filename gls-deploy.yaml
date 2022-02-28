@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gls-0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gls-0
+  template:
+    metadata:
+      labels:
+        app: gls-0
+    spec:
+      containers:
+        - name: gls-0
+          image: gcr.io/ssyt-342721/ssyt:v1
+          resources:
+            requests:
+              memory: "2000Mi"
