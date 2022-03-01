@@ -20,9 +20,9 @@ setup(
     ],
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
-        'google-cloud-bigquery >= 1.9.0',
-        'google-cloud-bigquery-storage >= 2.9.1',
-        'google-cloud-bigquery[bqstorage,pandas]',
+        #'google-cloud-bigquery >= 1.9.0',
+        #'google-cloud-bigquery-storage >= 2.9.1',
+        #'google-cloud-bigquery[bqstorage,pandas]',
         'numpy >= 1.21.3',
         'pandas >= 1.3.4',
         'streamlit >= 1.1.0',
