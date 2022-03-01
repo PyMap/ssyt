@@ -1,14 +1,14 @@
 ##########################################
 # Mercado formal de vivienda en alquiler #
 ##########################################
-from google.cloud import bigquery
-from google.oauth2 import service_account
+#from google.cloud import bigquery
+#from google.oauth2 import service_account
 
 import streamlit as st
 import os
 from utils import *
 from datasources import *
-import yaml
+#import yaml
 import pandas as pd
 from datetime import datetime
 
