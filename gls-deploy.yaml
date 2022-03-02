@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: syt-0
+  name: ssyt
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: syt-0
+      app: ssyt
   template:
     metadata:
       labels:
-        app: syt-0
+        app: ssyt
     spec:
       containers:
-        - name: syt-0
+        - name: ssyt # try ssyt-cluster (cluster name)
           image: gcr.io/ssyt-342721/ssyt:v1
           resources:
             requests:
