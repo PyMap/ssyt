@@ -53,7 +53,7 @@ class ContextoUrbano:
             area_cec['CEC_100']= round(area_cec['CEC']*100,2)
 
             fig, ax = plt.subplots()
-            area_cec.sort_values(by=estadistico,ascending='True').plot(x=id_superior,y='CEC_100', kind='bar',
+            area_cec.sort_values(by=estadistico,ascending=True).plot(x=id_superior,y='CEC_100', kind='bar',
                                                          figsize=(18,6), legend=False, ax=ax,
                                                          title='Concentración espacial de la categoría: %s'%
                                                                        (categoria),
@@ -108,10 +108,10 @@ class ContextoUrbano:
 
             area_cec= self.concentracion_espacial(x, id_inferior, id_superior)
             area_cec['CEC_100']= round(area_cec['CEC']*100,2)
-            area_cec = area_cec.sort_values(by=estadistico,ascending='True')
+            area_cec = area_cec.sort_values(by=estadistico,ascending=True)
 
             fig, ax = plt.subplots()
-            area_cec.sort_values(by=estadistico,ascending='True').plot(x=id_superior,y='CEC_100', kind='bar',
+            area_cec.sort_values(by=estadistico,ascending=True).plot(x=id_superior,y='CEC_100', kind='bar',
                                                          figsize=(18,6), legend=False, ax=ax,
                                                          title='Concentración espacial de la categoría: %s'%
                                                                        (categoria),
