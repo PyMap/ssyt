@@ -8,6 +8,7 @@ from utils import *
 import folium
 from streamlit_folium import folium_static
 import mapclassify
+from vivienda import formatea_isa
 
 
 def matplot_prices(df):
@@ -182,6 +183,67 @@ def plotly_percent_change(df, index_name, move_legend=False):
 
     return fig
 
+
+def plotly_trends(df, periodo_base, isa, rubro_isa,  move_legend):
+
+    df_ = df[['periodo', 'indice_per', 'precio_con', 'precio_nom']].copy()
+    isa_ = formatea_isa(isa, rubro_isa)
+    isa_ =  isa_[isa_.index.isin(df_.periodo.unique())].copy()
+
+    df_.rename(columns={'indice_per':'indice periodo',
+                        'precio_nom':'precios_nominales',
+                        'precio_con':'Precios constantes ($ARS)'}, inplace=True)
+    df_['Indice de salarios'] = isa_.values
+
+    from plotly.subplots import make_subplots
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig.add_trace(
+        go.Scatter(
+            name='$ARS constantes - base {} '.format(periodo_base),
+            x=df_['periodo'],
+            y=df_['Precios constantes ($ARS)'], #agregar año base con el que deflacta
+            mode='lines+markers',
+            marker_color='#000000',
+            #hovertemplate = '{}'.format(index_name)+': %{y:.2f}% <extra></extra>'
+            hovertemplate = '$ARS {}'.format(periodo_base)+': %{y:.2f} <extra></extra>'
+            ),
+            secondary_y=True)
+
+    fig.update_traces(marker_color='#ADD8E6', marker_line_color='#1E3F66',
+                      marker_line_width=1.5, opacity=0.6)
+
+    fig.add_trace(
+        go.Scatter(
+        name='Evolución ISA - base 2016-12 ',
+        x=df_['periodo'],
+        y=df_['Indice de salarios'],
+        hovertemplate="ISA: %{y:.2f}% <extra></extra>",
+        marker_color = '#000000'),
+        secondary_y=False
+    )
+
+    fig.update_layout(autosize=True,
+                      width=800,
+                      height=350,
+                      plot_bgcolor ='white',
+                      hoverlabel=dict(bgcolor="white"),
+                      yaxis=None,
+                      xaxis=None)
+    if move_legend:
+        fig.update_layout(legend=dict(
+                                      orientation="h",
+                                      yanchor="bottom",
+                                      y=-0.4,
+                                      xanchor="right",
+                                      x=1,
+                                     ))
+
+    fig.update_yaxes(showline=True, linecolor='black', ticksuffix = "%", title='ISA base 2016-12', secondary_y=False)
+    fig.update_yaxes(showline=True, linecolor='black', ticksuffix = "$", title='$ARS constantes', secondary_y=True)
+    fig.update_xaxes(showline=True, linecolor='black')
+
+    return fig
 
 def plot_graduated_scattermap(points_gdf, polygons_gdf, indicator):
     '''

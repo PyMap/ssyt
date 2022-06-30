@@ -6,7 +6,7 @@ long_description = (current_dir / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name="ssyt",
-    version="0.1dev",
+    version="0.1dev0",
     description='Systema Sociedad y Territorio',
     long_description=long_description,
     author='CEEU - UNSAM',
@@ -20,11 +20,11 @@ setup(
     ],
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
-        'google-cloud-bigquery >= 1.9.0',
-        'google-cloud-bigquery-storage >= 2.9.1',
-        'google-cloud-bigquery[bqstorage,pandas]',
-        'numpy >= 1.21.3',
-        'pandas >= 1.3.4',
+        #'google-cloud-bigquery >= 1.9.0',
+        #'google-cloud-bigquery-storage >= 2.9.1',
+        #'google-cloud-bigquery[bqstorage,pandas]',
+        'numpy >= 1.22.2',
+        'pandas >= 1.4.1',
         'streamlit >= 1.1.0',
         'matplotlib >= 3.4.3',
     ]
