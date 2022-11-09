@@ -40,7 +40,8 @@ def plot_simple_nodes_folium(G, m, node_color='blue'):
 def plot_isochrone(G, ref, travel_speed, m):
 
     # Use the more efficient `distance.nearest_nodes` instead.
-    center_node = ox.get_nearest_node(G,ref)
+    #center_node = ox.get_nearest_node(G,ref)
+    center_node = ox.nearest_nodes(G,X=ref[1],Y=ref[0])
     #center_node = ox.distance.nearest_nodes(G,X=ref[0], Y=ref[1])
 
     meters_per_minute = travel_speed * 1000 / 60

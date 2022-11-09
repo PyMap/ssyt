@@ -13,10 +13,9 @@ setup(
     author_email='fcatalano@unsam.edu.ar',
     url='https://github.com/PyMap/ssyt',
     classifiers=[
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    #'Programming Language :: Python :: 3.10'
     ],
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
@@ -25,7 +24,7 @@ setup(
         #'google-cloud-bigquery[bqstorage,pandas]',
         'numpy >= 1.22.2',
         'pandas >= 1.4.1',
-        'streamlit >= 1.1.0',
+        'streamlit == 1.1.0',
         'matplotlib >= 3.4.3',
     ]
 )
